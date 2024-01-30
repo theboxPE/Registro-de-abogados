@@ -1,0 +1,30 @@
+﻿@using Proyecto_Final.Data;
+@inject IJSRuntime JS
+
+@page "/view"
+
+
+<h3>View</h3>
+
+
+
+<button class="btn btn-outline-success" data-toggle="tooltip" title="Exportar" @onclick="(()=> export())">Encuentrame</button>
+<br />
+<div class="qr-code-container">
+    <div class="qr-code"></div>
+</div>
+<div id="map" class="map" style="height:500px;width:1500px"></div>
+
+
+@code {
+    private async Task export()
+    {
+
+        await JS.InvokeVoidAsync("GenerarMapa");
+
+    }
+    //https://forum.bubble.io/t/jspdf-integration/7618
+}
+
+
+

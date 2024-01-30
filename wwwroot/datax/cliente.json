@@ -1,0 +1,13 @@
+[
+  {
+    "Id": 1,
+    "Cedula": "36985214701",
+    "Nombre": "juan",
+    "Apellido": "peres",
+    "Correo": "eso@gmail.com",
+    "Telefono": "6547893210",
+    "Celular": "9874563211",
+    "Direccion": "eso",
+    "EstadoCivil": "Divorciado"
+  }
+]

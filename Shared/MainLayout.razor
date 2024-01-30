@@ -1,0 +1,33 @@
+﻿@inherits LayoutComponentBase
+
+<PageTitle>ProyectoFinal</PageTitle>
+
+<AuthorizeView>
+    <Authorized>
+        <div class="page">
+            <div class="sidebar">
+                <NavMenu />
+            </div>
+
+            <main>
+                <div class="top-row px-4 auth">
+                    <LoginDisplay />
+                    <a href="https://docs.microsoft.com/aspnet/" target="_blank">About</a>
+                </div>
+
+                <article class="content px-4">
+                    @Body
+                </article>
+            </main>
+        </div>
+    </Authorized>
+    <NotAuthorized>
+        <div class="text-center">
+            <br />
+            <h1>Debe de iniciar sesion para poder continuar</h1>
+            <br />
+            <a href="Identity/Account/Login">Log in</a>
+        </div>
+    </NotAuthorized>
+</AuthorizeView>
+

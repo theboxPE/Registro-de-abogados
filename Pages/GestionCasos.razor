@@ -1,0 +1,187 @@
+﻿@using Proyecto_Final.Data;
+@inject DataService DataService
+
+@page "/casos"
+
+<h3>Casos</h3>
+
+
+<AuthorizeView>
+    <Authorized>
+
+        <button class="btn btn-primary mb-3" @onclick="AgregarCaso">Agregar Caso</button>
+
+        @if (casos!.Any())
+        {
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Fecha</th>
+                        <th>Cliente</th>
+                        <th>Abogado Asignado</th>
+                        <th>Tipo de Caso</th>
+                        <th>Ubicación</th>
+                        <th>Descripción</th>
+                        <th>Estado del Caso</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var caso in casos!)
+                    {
+                        <tr>
+                            <td>@caso.Fecha</td>
+                            <td>@(caso.Clientes != null ? caso.ClienteNombre : "N/A")</td>
+                            <td>@caso.AbogadoAsignado</td>
+                            <td>@caso.TipoCaso</td>
+                            <td>@($"{caso.Latitud}, {caso.Longitud}")</td>
+                            <td>@caso.Descripcion</td>
+                            <td>@caso.EstadoCaso</td>
+                            <td>
+                                <button class="btn btn-info btn-sm" @onclick="() => EditarCaso(caso)">Editar</button>
+                                <button class="btn btn-danger btn-sm" @onclick="() => EliminarCaso(caso.Id)">Eliminar</button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+        else
+        {
+            <p>No hay casos registrados.</p>
+        }
+
+        @if (mostrarFormulario)
+        {
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Detalle del Caso</h5>
+                    <form>
+                        <div class="form-group">
+                            <label for="fecha">Fecha:</label>
+                            <input type="date" class="form-control" id="fecha" @bind="Seleccionado!.Fecha" />
+                        </div>
+                        <div class="form-group">
+                            <label for="cliente">Cliente:</label>
+                            <select class="form-control" id="cliente" @bind="Seleccionado.Id">
+                                @foreach (var cliente in clientes!)
+                                {
+                                    <option value="@cliente.Id">@cliente.Nombre</option>
+
+                                }
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="tipoCaso">Tipo de Caso:</label>
+                            <select class="form-control" @bind="Seleccionado.TipoCaso">
+                                <option value="Tipo1">Divorcio</option>
+                                <option value="Tipo2">Derecho Laboral</option>
+                                <option value="Tipo3">Criminal</option>
+                                <option value="Tipo3">Accidente de trafico</option>
+                                <option value="Tipo3">Propiedad Intelectual</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="latitud">Latitud:</label>
+                            <input type="text" class="form-control" id="latitud" @bind="Seleccionado.Latitud" />
+                        </div>
+                        <div class="form-group">
+                            <label for="longitud">Longitud:</label>
+                            <input type="text" class="form-control" id="longitud" @bind="Seleccionado.Longitud" />
+                        </div>
+                        <div class="form-group">
+                            <label for="descripcion">Descripción:</label>
+                            <textarea class="form-control" id="descripcion" @bind="Seleccionado.Descripcion"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="abogadoAsignado">Abogado Asignado:</label>
+                            <select class="form-control" @bind="Seleccionado.AbogadoAsignado">
+                                <option value="Abogado1">Juan Lopez</option>
+                                <option value="Abogado2">Maria Martinez</option>
+                                <option value="Abogado3">Jose Reyes</option>
+                                <option value="Abogado3">Juan Soto</option>
+                                <option value="Abogado3">Manuel Mota</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="estadoCaso">Estado del Caso:</label>
+                            <select class="form-control" @bind="Seleccionado.EstadoCaso">
+                                <option value="Estado1">Activo</option>
+                                <option value="Estado2">Proceso</option>
+                                <option value="Estado3">Cerrado</option>
+                                <option value="Estado3">Archivado</option>
+                            </select>
+                        </div>
+
+                        <br />
+                        <button type="button" class="btn btn-success" @onclick="GuardarCaso">Guardar</button>
+                        <button type="button" class="btn btn-secondary" @onclick="Cancelar">Cancelar</button>
+                    </form>
+                </div>
+            </div>
+        }
+    </Authorized>
+
+    <NotAuthorized>
+        Debe iniciar sesion para poder ver el contenido
+        <a href="Identity/Account/Login">Log in</a>
+    </NotAuthorized>
+</AuthorizeView>
+
+@code {
+    public List<Registro.Caso>? casos;
+    public List<Registro.Cliente>? clientes;
+    public Registro.Caso? Seleccionado;
+    public bool mostrarFormulario = false;
+    
+
+    protected override void OnInitialized()
+    {
+        casos = DataService.GetCasos();
+        clientes = DataService.GetClientes();
+    }
+
+    public void AgregarCaso()
+    {
+        Seleccionado = new Registro.Caso();
+        mostrarFormulario = true;
+    }
+
+    public void EditarCaso(Registro.Caso caso)
+    {
+        Seleccionado = caso;
+        mostrarFormulario = true;
+    }
+
+    public void GuardarCaso()
+    {
+        if (Seleccionado!.Id == 0)
+        {
+            Seleccionado.ClienteNombre = clientes!.FirstOrDefault(c => c.Id == Seleccionado.ClienteId)?.Nombre;
+
+            DataService.AddCaso(Seleccionado);
+        }
+        else
+        {
+            Seleccionado.ClienteNombre = clientes!.FirstOrDefault(c => c.Id == Seleccionado.ClienteId)?.Nombre;
+
+            DataService.UpdateCaso(Seleccionado);
+        }
+
+        casos = DataService.GetCasos();
+        Seleccionado = null;
+        mostrarFormulario = false;
+    }
+
+    public void Cancelar()
+    {
+        Seleccionado = null!;
+        mostrarFormulario = false;
+    }
+
+    public void EliminarCaso(int casoId)
+    {
+        DataService.DeleteCaso(casoId);
+        casos = DataService.GetCasos();
+    }
+}

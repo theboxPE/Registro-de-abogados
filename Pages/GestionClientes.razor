@@ -1,0 +1,168 @@
+﻿@using Proyecto_Final.Data;
+@inject DataService DataService;
+
+@page "/clientes"
+
+
+<h3>Clientes</h3>
+
+<AuthorizeView>
+    <Authorized>
+
+        <button class="btn btn-primary mb-3" @onclick="MostrarFormularioAgregarCliente">Agregar Cliente</button>
+
+        @if (cliente!.Any())
+        {
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Nombre</th>
+                        <th>Apellido</th>
+                        <th>Cédula</th>
+                        <th>Correo</th>
+                        <th>Teléfono</th>
+                        <th>Celular</th>
+                        <th>Dirección</th>
+                        <th>Estado Civil</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var cliente in cliente!)
+                    {
+                        <tr>
+                            <td>@cliente.Nombre</td>
+                            <td>@cliente.Apellido</td>
+                            <td>@cliente.Cedula</td>
+                            <td>@cliente.Correo</td>
+                            <td>@cliente.Telefono</td>
+                            <td>@cliente.Celular</td>
+                            <td>@cliente.Direccion</td>
+                            <td>@cliente.EstadoCivil</td>
+                            <td>
+                                <button class="btn btn-info btn-sm" @onclick="() => MostrarFormularioEditarCliente(cliente)">Editar</button>
+                                <button class="btn btn-danger btn-sm" @onclick="() => EliminarCliente(cliente.Id)">Eliminar</button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+        else
+        {
+            <p>No hay clientes registrados.</p>
+        }
+
+        @if (mostrarFormulario)
+        {
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Detalle del Cliente</h5>
+                    <form>
+                        <div class="form-group">
+                            <label for="nombre">Nombre:</label>
+                            <input type="text" class="form-control" id="nombre" @bind="Seleccionado!.Nombre" />
+                        </div>
+                        <div class="form-group">
+                            <label for="apellido">Apellido:</label>
+                            <input type="text" class="form-control" id="apellido" @bind="Seleccionado.Apellido" />
+                        </div>
+                        <div class="form-group">
+                            <label for="cedula">Cédula:</label>
+                            <input type="text" class="form-control" id="cedula" @bind="Seleccionado.Cedula" />
+                        </div>
+                        <div class="form-group">
+                            <label for="correo">Correo:</label>
+                            <input type="text" class="form-control" id="correo" @bind="Seleccionado.Correo" />
+                        </div>
+                        <div class="form-group">
+                            <label for="telefono">Teléfono:</label>
+                            <input type="text" class="form-control" id="telefono" @bind="Seleccionado.Telefono" />
+                        </div>
+                        <div class="form-group">
+                            <label for="celular">Celular:</label>
+                            <input type="text" class="form-control" id="celular" @bind="Seleccionado.Celular" />
+                        </div>
+                        <div class="form-group">
+                            <label for="direccion">Dirección:</label>
+                            <input type="text" class="form-control" id="direccion" @bind="Seleccionado.Direccion" />
+                        </div>
+                        <div class="form-group">
+                            <label for="estadoCivil">Estado Civil:</label>
+                            <select class="form-control" @bind="Seleccionado.EstadoCivil">
+                                <option value="Soltero">Soltero</option>
+                                <option value="Casado">Casado</option>
+                                <option value="Divorciado">Divorciado</option>
+                                <option value="Viudo">Viudo</option>
+                            </select>
+                        </div>
+                        
+                        <br>
+                        <button type="button" class="btn btn-success" @onclick="AgregarCliente">Guardar</button>
+                        <button type="button" class="btn btn-secondary" @onclick="Cancelar">Cancelar</button>
+                    </form>
+                </div>
+            </div>
+        }
+        
+    </Authorized>
+
+    <NotAuthorized>
+        Debe iniciar sesion para poder ver el contenido
+        <a href="Identity/Account/Login">Log in</a>
+    </NotAuthorized>
+
+</AuthorizeView>
+
+@code {
+    public List<Registro.Cliente>? cliente;
+    public Registro.Cliente? Seleccionado;
+    private bool mostrarFormulario = false;
+
+    
+
+    protected override void OnInitialized()
+    {
+        cliente = DataService.GetClientes();
+    }
+
+    public void MostrarFormularioAgregarCliente()
+    {
+        Seleccionado = new Registro.Cliente();
+        mostrarFormulario = true;
+    }
+
+    public void MostrarFormularioEditarCliente(Registro.Cliente cliente)
+    {
+        Seleccionado = cliente;
+        mostrarFormulario = true;
+    }
+
+    public void AgregarCliente()
+    {
+        if (Seleccionado!.Id == 0)
+        {
+            DataService.AddCliente(Seleccionado);
+        }
+        else
+        {
+            DataService.UpdateCliente(Seleccionado);
+        }
+
+        cliente = DataService.GetClientes();
+        Seleccionado = null;
+        mostrarFormulario = false;
+    }
+
+    public void Cancelar()
+    {
+        Seleccionado = null;
+        mostrarFormulario = false;
+    }
+
+    public void EliminarCliente(int clienteId)
+    {
+        DataService.DeleteCliente(clienteId);
+        cliente = DataService.GetClientes();
+    }
+}
